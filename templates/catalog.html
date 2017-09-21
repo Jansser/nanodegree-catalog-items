@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+{% block list %}
+    {% if items %}
+        <h2 class="ui dividing header">
+            <a class="ui green ribbon label large">{{category.name}}</a>     
+            <div class="sub header">
+                <small>{{ items|length }} Items</small>
+            </div>
+        </h2>
+
+        <a class="ui button" href="{{ url_for('new_item') }}">Add Item</a>
+                
+        <div class="ui hidden divider"></div>
+        
+        <div class="ui four stackable cards">
+            {% for item in items %}
+                {% include 'item_tmpl.html' %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <a class="ui button" href="{{ url_for('new_item') }}">Add Item</a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="ui grid">
+        <div class="four wide column">
+            <div class="ui vertical menu">
+                <div class="item">
+                    <div class="header">
+                        Categories
+                    </div>
+                    <div class="menu">
+                        {% for category in categories %}
+                            <a href="{{ url_for('list_category_items', category_name=category.name) }}" class="item">{{category.name}}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="eight wide column">
+            {% block list %}
+            
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

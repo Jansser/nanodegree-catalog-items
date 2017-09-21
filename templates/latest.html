@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+{% block list %}
+    <h2 class="ui header">
+        Latest Items
+    </h2>
+
+    <a class="ui button" href="{{ url_for('new_item') }}">Add Item</a>
+    
+    <div class="ui hidden divider"></div>
+
+    <div class="ui two stackable cards">
+        {% for item in latest_items %}
+            {% include "item_tmpl.html" %} 
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
