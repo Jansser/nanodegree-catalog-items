@@ -12,8 +12,6 @@
         </span>
     </div>
 
-    <div id="result"></div>
-
     <script>
         function signInCallback(authResult) {
             if (authResult['code']) {
@@ -28,8 +26,9 @@
 
                     success: function(result) {
                         if (result) {
-                            //TODO - send like a flash success message...
-                            $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+                            $(".ui.message").addClass("positive")
+                            $(".ui.message").html("Login Successful!</br>'+ result + '</br>Redirecting...")
+                            
 
                             //Redirecting to the main page.
                             setTimeout(function() {

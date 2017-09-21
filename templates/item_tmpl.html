@@ -1,6 +1,11 @@
 <div class="ui fluid card">
-    <div class="ui image">
-        <img src="https://www.kpfinder.com/assets/default_product.jpg" alt="Product Image">
+    <div class="ui image medium">
+        {% if item.image_url %}
+            <img src="{{item.image_url}}" alt="Product Image">
+        {% else %}
+            <img src="https://www.kpfinder.com/assets/default_product.jpg" alt="Product Image">
+        {% endif %}
+        
     </div>
 
     <div class="content">

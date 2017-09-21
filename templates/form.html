@@ -27,9 +27,14 @@
             {% endfor %}
         </select>
     </div>
-
+    
     <div class="field">
-        <input type="file" name="image" value="{{item.image_url}}">
+        <label for="image">Image:</label>
+        {% if item.image_url %}
+            <img class="ui image rounded bordered medium" src="{{ item.image_url }}">
+        {% endif %}
+
+        <input type="file" name="image">
     </div>
 
     <div>

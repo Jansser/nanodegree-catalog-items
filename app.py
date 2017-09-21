@@ -141,7 +141,6 @@ def gdisconnect():
         return response
 
     url = "https://accounts.google.com/o/oauth2/revoke?token=%s" % login_session["access_token"]
-    print(url)
     h = httplib2.Http()
 
     result = h.request(url, "GET")[0]
@@ -284,6 +283,10 @@ def show_item(category_name, item_name):
     # Else shows a error page
     return render_template("item.html", item=item)
 
+def delete_item_image(item):
+    if item.image_filename:
+        path = images.path(item.image_filename)
+        os.remove(path)
 
 @app.route("/catalog/<string:category_name>/<string:item_name>/edit",
            methods=["GET", "POST"])
@@ -326,8 +329,12 @@ def edit_item(category_name, item_name):
 
         if image:
             image_filename = images.save(image)
-            url_image = images.url(image_filename)            
+            url_image = images.url(image_filename)  
 
+            item.image_url = url_image
+            item.image_filename = image_filename          
+            
+            delete_item_image(item)
 
         item.name = name
         item.description = description
@@ -339,11 +346,12 @@ def edit_item(category_name, item_name):
         return render_template("item.html", item=item)
     else:
         categories = session.query(Category).all()
+        
         return render_template("form.html", item=item,
                                 categories=categories,
                                 mode="Edit")
 
-#TODO - Think how to implement with delete method on form (Javascript everywhere)
+
 @app.route("/catalog/<string:category_name>/<string:item_name>/delete",
            methods=["GET", "POST"])
 def delete_item(category_name, item_name):
@@ -358,10 +366,11 @@ def delete_item(category_name, item_name):
                      item_name=item.name))
 
     if request.method == "POST":
+        delete_item_image(item)
         session.delete(item)
         session.commit()
-        #TODO - delete image from item if exists
-        # Flash message
+        
+        flash("Item was deleted!", "positive")
         return redirect(url_for("list_category_items", category_name=category_name))
     else:
         return render_template("delete.html", item=item)
