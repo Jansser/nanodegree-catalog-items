@@ -1,5 +1,5 @@
 <div class="ui fluid card">
-    <div class="ui image medium">
+    <div class="ui image fluid">
         {% if item.image_url %}
             <img src="{{item.image_url}}" alt="Product Image">
         {% else %}
@@ -23,11 +23,15 @@
     </div>
 
     <div class="extra content">
-        {% if item.user_id == session['user_id'] %}
-            <a class="ui button" href="{{ url_for('edit_item', item_name=item.name, category_name=item.category.name) }}">Edit</a>
-            <a class="ui red button" href="{{ url_for('delete_item', item_name=item.name, category_name=item.category.name) }}">Delete</a>
-        {% endif %}
+        <div class="right floated author">
+            {% if item.user_id == session['user_id'] %}
+                <a class="mini ui button" href="{{ url_for('edit_item', item_name=item.name, category_name=item.category.name) }}">Edit</a>
+                <a class="mini ui red button" href="{{ url_for('delete_item', item_name=item.name, category_name=item.category.name) }}">Delete</a>
+            {% endif %}
+        </div>
+    </div>
 
+    <div class="extra content">
         <div class="right floated author">
             {% if item.user.picture %}
                 <img class="ui avatar image" src="{{item.user.picture}}">

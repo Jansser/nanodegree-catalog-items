@@ -25,7 +25,6 @@ class Item(Base):
     name = Column(String(250), nullable=False)
     description = Column(Text)
     created_at = Column(DateTime, nullable=False, default=func.now())
-    
     image_filename = Column(String)
     image_url = Column(String)
 

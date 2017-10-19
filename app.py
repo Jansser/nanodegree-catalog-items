@@ -10,8 +10,11 @@ from database import Base, Category, Item, User
 
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
-import random, string
-import requests, httplib2, json
+import random
+import string
+import requests
+import httplib2
+import json
 import os
 
 app = Flask(__name__)
@@ -22,18 +25,21 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 app.config["UPLOADS_DEFAULT_DEST"] = os.getcwd() + "/static"
-app.config["UPLOADS_DEFAULT_URL"] = "http://localhost:4040/static" 
+app.config["UPLOADS_DEFAULT_URL"] = "http://localhost:4040/static"
 app.config["UPLOADS_IMAGES_DEST"] = os.getcwd() + "/static"
 app.config["UPLOADS_IMAGES_URL"] = "http://localhost:4040/static"
 
 images = UploadSet('images', IMAGES)
 configure_uploads(app, images)
 
-CLIENT_ID = json.loads(open("client_secrets.json", "r").read())["web"]["client_id"]
+CLIENT_ID = json.loads(open("client_secrets.json", "r").read())[
+    "web"]["client_id"]
+
 
 @app.route("/login")
 def show_login():
-    state = "".join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
+    state = "".join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in range(32))
     login_session["state"] = state
     return render_template("login.html", STATE=state)
 
@@ -61,7 +67,7 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
-    
+
     url = ("https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s"
            % access_token)
     h = httplib2.Http()
@@ -92,8 +98,9 @@ def gconnect():
     stored_credentials = login_session.get("credentials")
     stored_gplus_id = login_session.get("gplus_id")
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps("Current user is already connected."),
-                                 200)
+        response = make_response(
+                json.dumps("Current user is already connected."),
+                200)
         response.headers["Content-Type"] = "application/json"
         return response
 
@@ -101,7 +108,6 @@ def gconnect():
     login_session["access_token"] = credentials.access_token
     login_session["gplus_id"] = gplus_id
 
-    #TODO - METHOD GET GOOGLE USER INFO
     # Get user info
     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     params = {"access_token": credentials.access_token, "alt": "json"}
@@ -112,39 +118,30 @@ def gconnect():
     login_session["picture"] = data["picture"]
     login_session["email"] = data["email"]
 
-    print("CREATE IF NOT EXISTS")
-    
     user_id = get_user_id(login_session["email"])
-       
+
     if not user_id:
-        print("Creating user...")
         user_id = create_user(login_session)
-    else:
-        print("User already exists...")
 
     login_session["user_id"] = user_id
 
-    output = "<OK ?>"
-    flash("you are now logged in as %s" % login_session["username"])
-    return output
+    flash("you are now logged in as %s" %
+          login_session["username"], "positive")
+    return "OK"
+
 
 @app.route("/gdisconnect")
 def gdisconnect():
-    #TODO - Create a separated file for google sign in handle.
-    #TODO - Check if the config of libraries is OK to handle credentials according with class 9 - GConnect.
-    #TODO - Create in gconnect separated methods for the validations and test them (automatically if possible).
-    access_token = login_session["access_token"]
-    
-    if access_token is None:
-        response = make_response(json.dumps("Current user not connected."), 401)
-        response.headers["Content-Type"] = "application/json"
-        return response
+    if "access_token" not in login_session:
+        flash("Current user not connected.", "negative")
+        return redirect("/")
 
-    url = "https://accounts.google.com/o/oauth2/revoke?token=%s" % login_session["access_token"]
+    url = ("https://accounts.google.com/o/oauth2/revoke?token=%s"
+           % login_session["access_token"])
     h = httplib2.Http()
 
     result = h.request(url, "GET")[0]
-    
+
     if result["status"] == "200":
         del login_session["access_token"]
         del login_session["gplus_id"]
@@ -153,13 +150,11 @@ def gdisconnect():
         del login_session["picture"]
         del login_session["user_id"]
 
-        response = make_response(json.dumps("Successfully disconnected."), 200)
-        response.headers["Content-Type"] = "application/json"
-        return response
+        flash("Successfully disconnected.", "positive")
+        return redirect("/")
     else:
-        response = make_response(json.dumps("Failed to revoke token for given user."), 400)
-        response.headers["Content-Type"] = "application/json"
-        return response
+        flash("Failed to revoke token for given user.", "negative")
+        return redirect("/")
 
 
 def create_user(login_session):
@@ -188,14 +183,17 @@ def get_user_id(email):
 def get_category_by_name(name):
     return session.query(Category).filter_by(name=name).first()
 
+
 def current_user_is_creator_of(item):
     return item.user_id == login_session["user_id"]
+
 
 @app.route("/")
 def list():
     categories = session.query(Category).all()
-    latest_items = session.query(Item).order_by(Item.created_at.desc()).limit(10)
-    
+    latest_items = session.query(Item).order_by(
+        Item.created_at.desc()).limit(10)
+
     return render_template("latest.html", categories=categories,
                            latest_items=latest_items)
 
@@ -204,7 +202,7 @@ def list():
 def list_category_items(category_name):
     category = get_category_by_name(category_name)
     items = []
-    
+
     if category:
         items = session.query(Item).filter_by(category_id=category.id).all()
 
@@ -215,7 +213,9 @@ def list_category_items(category_name):
 
     categories = session.query(Category).all()
 
-    return render_template("catalog.html", category=category, items=items, categories=categories)
+    return render_template("catalog.html", category=category,
+                           items=items,
+                           categories=categories)
 
 
 @app.route("/catalog/new", methods=["GET", "POST"])
@@ -229,22 +229,22 @@ def new_item():
         category_id = request.form["category"]
         image_filename = ""
         url_image = ""
-        
-        image = request.files["image"] 
+
+        image = request.files["image"]
 
         if image:
             image_filename = images.save(image)
-            url_image = images.url(image_filename)            
+            url_image = images.url(image_filename)
 
         if not name:
             flash("Item should have a name!", "negative")
-            
+
         if not description:
             flash("Item should have a description!", "negative")
-            
+
         if not category_id:
             flash("Item should have a category!", "negative")
-        
+
         if not name or not description or not category_id:
             categories = session.query(Category).all()
             return render_template("form.html",
@@ -283,23 +283,25 @@ def show_item(category_name, item_name):
     # Else shows a error page
     return render_template("item.html", item=item)
 
+
 def delete_item_image(item):
     if item.image_filename:
         path = images.path(item.image_filename)
         os.remove(path)
 
+
 @app.route("/catalog/<string:category_name>/<string:item_name>/edit",
            methods=["GET", "POST"])
 def edit_item(category_name, item_name):
     category = get_category_by_name(category_name)
-    
+
     if category:
         item = session.query(Item).filter_by(name=item_name,
                                              category_id=category.id).first()
 
     if not current_user_is_creator_of(item):
         return redirect(url_for("show_item", category_name=category_name,
-                     item_name=item.name))
+                                item_name=item.name))
 
     if request.method == "POST":
         name = request.form["name"]
@@ -308,13 +310,13 @@ def edit_item(category_name, item_name):
 
         if not name:
             flash("Item should have a name!", "negative")
-            
+
         if not description:
             flash("Item should have a description!", "negative")
-            
+
         if not category_id:
             flash("Item should have a category!", "negative")
-        
+
         if not name or not description or not category_id:
             categories = session.query(Category).all()
             return render_template("form.html",
@@ -324,17 +326,17 @@ def edit_item(category_name, item_name):
 
         image_filename = ""
         url_image = ""
-        
-        image = request.files["image"] 
+
+        image = request.files["image"]
 
         if image:
+            delete_item_image(item)
+
             image_filename = images.save(image)
-            url_image = images.url(image_filename)  
+            url_image = images.url(image_filename)
 
             item.image_url = url_image
-            item.image_filename = image_filename          
-            
-            delete_item_image(item)
+            item.image_filename = image_filename
 
         item.name = name
         item.description = description
@@ -346,39 +348,42 @@ def edit_item(category_name, item_name):
         return render_template("item.html", item=item)
     else:
         categories = session.query(Category).all()
-        
+
         return render_template("form.html", item=item,
-                                categories=categories,
-                                mode="Edit")
+                               categories=categories,
+                               mode="Edit")
 
 
 @app.route("/catalog/<string:category_name>/<string:item_name>/delete",
            methods=["GET", "POST"])
 def delete_item(category_name, item_name):
     category = get_category_by_name(category_name)
-    
+
     if category:
         item = session.query(Item).filter_by(name=item_name,
                                              category_id=category.id).first()
-    
+
     if not current_user_is_creator_of(item):
         return redirect(url_for("show_item", category_name=category_name,
-                     item_name=item.name))
+                                item_name=item.name))
 
     if request.method == "POST":
         delete_item_image(item)
         session.delete(item)
         session.commit()
-        
+
         flash("Item was deleted!", "positive")
-        return redirect(url_for("list_category_items", category_name=category_name))
+        return redirect(url_for("list_category_items",
+                                category_name=category_name))
     else:
         return render_template("delete.html", item=item)
-        
+
 
 """
     JSON ENDPOINTS
 """
+
+
 @app.route("/catalog.json")
 def catalog_json():
     categories = session.query(Category).all()
@@ -400,7 +405,8 @@ def catalog_item_json(category_name, item_name):
     category = session.query(Category).filter_by(name=category_name).first()
 
     if category:
-        item = session.query(Item).filter_by(name=item_name, category_id=category.id).first()
+        item = session.query(Item).filter_by(
+            name=item_name, category_id=category.id).first()
         if item:
             return jsonify(catalog=[item.serialize])
         else:
@@ -412,4 +418,4 @@ def catalog_item_json(category_name, item_name):
 if __name__ == "__main__":
     app.secret_key = "slimShady"
     app.debug = True
-    app.run(host="0.0.0.0", port=4040)
+    app.run(host="0.0.0.0", port=8000)

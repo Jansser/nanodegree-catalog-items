@@ -5,15 +5,18 @@ from database import Base, Category, Item, User
 engine = create_engine("sqlite:///catalog.db")
 Base.metadata.bind = engine
 
-DBSession = sessionmaker(bind = engine)
+DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-jaspion = User(name="Jaspion", 
-            email="jaspion.gmail.com", 
-            picture="http://modomeu.com/wp-content/uploads/2015/05/23-jaspion.jpg")
+# Creating a user
+jaspion = User(name="Jaspion",
+               email="jaspion.gmail.com",
+               picture="http://modomeu.com/wp-content/"
+               "uploads/2015/05/23-jaspion.jpg")
 session.add(jaspion)
 session.commit()
 
+# Creating all the categories and items
 soccer = Category(name="Soccer")
 session.add(soccer)
 session.commit()
@@ -38,7 +41,8 @@ snowboarding = Category(name="Snowboarding")
 session.add(snowboarding)
 session.commit()
 
-soccer_cleats = Item(name="Soccer Cleats", category_id=soccer.id, user_id=jaspion.id)
+soccer_cleats = Item(name="Soccer Cleats",
+                     category_id=soccer.id, user_id=jaspion.id)
 session.add(soccer_cleats)
 session.commit()
 
@@ -58,11 +62,13 @@ shinguards = Item(name="Shinguards", category_id=soccer.id, user_id=jaspion.id)
 session.add(shinguards)
 session.commit()
 
-two_shinguards=Item(name="Two shinguards", category_id=soccer.id, user_id=jaspion.id)
+two_shinguards = Item(name="Two shinguards",
+                      category_id=soccer.id, user_id=jaspion.id)
 session.add(two_shinguards)
 session.commit()
 
-snowboard = Item(name="Snowboard", category_id=snowboarding.id, user_id=jaspion.id)
+snowboard = Item(name="Snowboard",
+                 category_id=snowboarding.id, user_id=jaspion.id)
 session.add(snowboard)
 session.commit()
 

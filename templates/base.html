@@ -5,6 +5,7 @@
         <title>Catalog App</title>
 
         <link rel="stylesheet" href="{{ url_for('static', filename='css/semantic/semantic.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
         
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
@@ -12,7 +13,14 @@
     </head>
     <body>
         {% include 'header.html' %}
-        
+        <div id="pageDimmer" class="ui page dimmer">
+            <div class="content">
+                <div class="center">
+                    <div id="loader" class="ui text loader">Loading...</div>    
+                </div>
+            </div>
+        </div>
+
         <div class="ui container">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -26,8 +34,16 @@
                 {% endif %}
             {% endwith %}
 
+            
             {% block content %}
             {% endblock %}
         </div>
+        
+
+        <script>
+            $("#logoutButton").click(function () {
+                $("#pageDimmer").dimmer('show');
+            });
+        </script>
     </body>
 </html>
