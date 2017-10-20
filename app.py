@@ -3,11 +3,11 @@ from flask import render_template, redirect, url_for
 from flask import request, flash, jsonify
 from flask import make_response
 from flask import session as login_session
+from werkzeug.routing import RequestRedirect
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from database import Base, Category, Item, User
-
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import random
@@ -25,9 +25,9 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 app.config["UPLOADS_DEFAULT_DEST"] = os.getcwd() + "/static"
-app.config["UPLOADS_DEFAULT_URL"] = "http://localhost:4040/static"
+app.config["UPLOADS_DEFAULT_URL"] = "http://localhost:8000/static"
 app.config["UPLOADS_IMAGES_DEST"] = os.getcwd() + "/static"
-app.config["UPLOADS_IMAGES_URL"] = "http://localhost:4040/static"
+app.config["UPLOADS_IMAGES_URL"] = "http://localhost:8000/static"
 
 images = UploadSet('images', IMAGES)
 configure_uploads(app, images)
@@ -99,8 +99,8 @@ def gconnect():
     stored_gplus_id = login_session.get("gplus_id")
     if stored_credentials is not None and gplus_id == stored_gplus_id:
         response = make_response(
-                json.dumps("Current user is already connected."),
-                200)
+            json.dumps("Current user is already connected."),
+            200)
         response.headers["Content-Type"] = "application/json"
         return response
 
@@ -188,6 +188,14 @@ def current_user_is_creator_of(item):
     return item.user_id == login_session["user_id"]
 
 
+def redirect_when_user_not_logged():
+    try:
+        if "username" not in login_session:
+            raise RequestRedirect("/login")
+    except KeyError:
+        pass
+
+
 @app.route("/")
 def list():
     categories = session.query(Category).all()
@@ -220,8 +228,7 @@ def list_category_items(category_name):
 
 @app.route("/catalog/new", methods=["GET", "POST"])
 def new_item():
-    if "username" not in login_session:
-        return redirect("/login")
+    redirect_when_user_not_logged()
 
     if request.method == "POST":
         name = request.form["name"]
@@ -293,6 +300,8 @@ def delete_item_image(item):
 @app.route("/catalog/<string:category_name>/<string:item_name>/edit",
            methods=["GET", "POST"])
 def edit_item(category_name, item_name):
+    redirect_when_user_not_logged()
+
     category = get_category_by_name(category_name)
 
     if category:
@@ -357,6 +366,7 @@ def edit_item(category_name, item_name):
 @app.route("/catalog/<string:category_name>/<string:item_name>/delete",
            methods=["GET", "POST"])
 def delete_item(category_name, item_name):
+    redirect_when_user_not_logged()
     category = get_category_by_name(category_name)
 
     if category:
