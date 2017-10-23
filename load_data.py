@@ -1,3 +1,6 @@
+"""
+Populate the database with categories and items.
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database import Base, Category, Item, User

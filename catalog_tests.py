@@ -1,3 +1,6 @@
+"""
+Automated tests for the catalog app.
+"""
 import flask
 from flask import url_for
 from app import app
@@ -22,6 +25,9 @@ class FlaskTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_redirect_new_item_not_authorized(self):
+        """
+        Test if is checking the authorizathion status on create new item route
+        """
         response = self.app.get('/catalog/new')
         assert '/login' in response.location
 

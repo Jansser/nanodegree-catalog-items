@@ -1,3 +1,6 @@
+"""
+Creates and initialiaze the database structure on sqlite3.
+"""
 import sys
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base

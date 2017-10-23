@@ -1,3 +1,7 @@
+"""
+A web application that provides a list of items within a variety of categories and integrate third party user registration and authentication.
+Authenticated users should have the ability to post, edit, and delete their own items.
+"""
 from flask import Flask
 from flask import render_template, redirect, url_for
 from flask import request, flash, jsonify
@@ -46,6 +50,9 @@ def show_login():
 
 @app.route("/gconnect", methods=["POST"])
 def gconnect():
+    """
+    Handle google oauth2 authentication
+    """
     # Validate state token
     if request.args.get("state") != login_session["state"]:
         response = make_response(json.dumps("Invalid state parameter."), 401)
@@ -132,6 +139,9 @@ def gconnect():
 
 @app.route("/gdisconnect")
 def gdisconnect():
+    """
+    Disconnects google account
+    """
     if "access_token" not in login_session:
         flash("Current user not connected.", "negative")
         return redirect("/")
@@ -158,6 +168,9 @@ def gdisconnect():
 
 
 def create_user(login_session):
+    """
+    Creating a user in the database with google account info.
+    """
     newUser = User(name=login_session["username"],
                    email=login_session["email"],
                    picture=login_session["picture"])
@@ -189,6 +202,9 @@ def current_user_is_creator_of(item):
 
 
 def redirect_when_user_not_logged():
+    """
+    Redirects to login page when there is no user logged.
+    """
     try:
         if "username" not in login_session:
             raise RequestRedirect("/login")
@@ -287,7 +303,6 @@ def show_item(category_name, item_name):
         item = session.query(Item).filter_by(name=item_name,
                                              category_id=category.id).first()
 
-    # Else shows a error page
     return render_template("item.html", item=item)
 
 
