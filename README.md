@@ -3,21 +3,7 @@ A project to Full Stack Web Developer Nanodegree program. A web application that
 
 ### Installation
 
-The project requires [Python](https://www.python.org/downloads/) 3 and the libaries below.
-
-```pip install flask```
-
-```pip install sql-alchemy```
-
-```pip install httplib2```
-
-```pip install requests```
-
-```pip install flask-sqlalchemy```
-
-```pip install oauth2client```
-
-```pip install flask_uploads```
+The project requires [Python](https://www.python.org/downloads/) 3 and the libaries listed on `requirements.txt` to install all run `pip install -r requirements.txt`.
 
 ### How to run
 
